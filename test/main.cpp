@@ -26,8 +26,66 @@
 
 #include <gtest/gtest.h>
 
+struct Node
+{
+    int m_x;
+    int m_y;
+
+    bool operator<(const Node &other) const
+    {
+        if (m_x < other.m_x) {
+            return true;
+        } else if (m_x == other.m_x) {
+            return m_y < other.m_y;
+        }
+        return false;
+    }
+};
+
 TEST(General, Constructor)
 {
+    Graphene<int> graph;
+}
+
+TEST(General, AddEdge)
+{
+    Graphene<int> graph;
+    graph.addEdge(1, 2);
+
+    EXPECT_EQ(graph.size(), 1);
+    EXPECT_EQ(graph.order(), 2);
+}
+
+TEST(General, AddEdgeUndirected)
+{
+    Graphene<int, GraphType::Undirected> graph;
+    graph.addEdge(1, 2);
+
+    EXPECT_EQ(graph.size(), 2);
+    EXPECT_EQ(graph.order(), 2);
+}
+
+TEST(General, AddNode)
+{
+    Graphene<int> graph;
+    graph.addNode(42);
+
+    EXPECT_EQ(graph.size(), 0);
+    EXPECT_EQ(graph.order(), 1);
+}
+
+TEST(General, ComplexNode)
+{
+    Graphene<Node> graph;
+    graph.addNode({0, 0});
+    graph.addEdge({0, 0}, {1, 1});
+
+    EXPECT_EQ(graph.size(), 1);
+    EXPECT_EQ(graph.order(), 2);
+    EXPECT_EQ(graph.nodeDegree({0, 0}), 1);
+    EXPECT_EQ(graph.nodeDegree({1, 1}), 0);
+    EXPECT_EQ(graph.adjacent({0, 0}, {1, 1}), true);
+    EXPECT_EQ(graph.adjacent({1, 1}, {0, 0}), false);
 }
 
 int main(int argc, char**argv)

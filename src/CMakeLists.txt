@@ -41,6 +41,7 @@ target_include_directories(${TARGET}
 
 if (MSVC)
     target_compile_definitions(${TARGET} PUBLIC MAKEDLL)
+    add_compile_options(/wd4251)
 endif()
 
 ###############################################################################
