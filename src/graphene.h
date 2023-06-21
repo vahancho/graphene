@@ -41,10 +41,12 @@ class Graphene
 {
 public:
     /// Adds new node.
-    void addNode(NodeType node);
+    template<typename UR = NodeType>
+    void addNode(UR && node);
 
     /// Adds an edge with the given \p tile and \p head
-    void addEdge(NodeType tile, NodeType head);
+    template<typename UR = NodeType>
+    void addEdge(UR && tile, UR && head);
 
     /// The order of a graph is its number of nodes
     size_t order() const;
@@ -53,10 +55,10 @@ public:
     size_t size() const;
 
     /// The degree or valency of a vertex is the number of edges that are incident to it
-    size_t nodeDegree(NodeType node) const;
+    size_t nodeDegree(const NodeType &node) const;
 
     /// Two nodes \p x and \p y are adjacent if {x, y} is an edge
-    bool adjacent(NodeType x, NodeType y) const;
+    bool adjacent(const NodeType &x, const NodeType &y) const;
 
 private:
     std::map<NodeType, std::set<NodeType>> m_adjacencyList;
@@ -65,24 +67,26 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // Definition of the function templates
 template<typename NodeType, GraphType GT>
-void Graphene<NodeType, GT>::addNode(NodeType node)
+template<typename UR>
+void Graphene<NodeType, GT>::addNode(UR && node)
 {
-    m_adjacencyList[node];
+    m_adjacencyList[std::forward<UR>(node)];
 }
 
 template<typename NodeType, GraphType GT>
-void Graphene<NodeType, GT>::addEdge(NodeType tile, NodeType head)
+template<typename UR>
+void Graphene<NodeType, GT>::addEdge(UR && tile, UR && head)
 {
-    auto &headNeighbours = m_adjacencyList[head];
-    auto &tileNeighbours = m_adjacencyList[tile];
+    auto &headNeighbours = m_adjacencyList[std::forward<UR>(head)];
+    auto &tileNeighbours = m_adjacencyList[std::forward<UR>(tile)];
 
     // Link tile -> head
-    tileNeighbours.emplace(std::move(head));
+    tileNeighbours.emplace(std::forward<UR>(head));
 
     // C++17
     if constexpr (GT == GraphType::Undirected) {
         // Link head -> tile
-        headNeighbours.emplace(std::move(tile));
+        headNeighbours.emplace(std::forward<UR>(tile));
     }
 }
 
@@ -103,7 +107,7 @@ size_t Graphene<NodeType, GT>::size() const
 }
 
 template<typename NodeType, GraphType GT>
-size_t Graphene<NodeType, GT>::nodeDegree(NodeType node) const
+size_t Graphene<NodeType, GT>::nodeDegree(const NodeType &node) const
 {
     auto it = m_adjacencyList.find(node);
     if (it != m_adjacencyList.cend()) {
@@ -113,7 +117,7 @@ size_t Graphene<NodeType, GT>::nodeDegree(NodeType node) const
 }
 
 template<typename NodeType, GraphType GT>
-bool Graphene<NodeType, GT>::adjacent(NodeType x, NodeType y) const
+bool Graphene<NodeType, GT>::adjacent(const NodeType &x, const NodeType &y) const
 {
     auto it = m_adjacencyList.find(x);
     if (it != m_adjacencyList.cend()) {

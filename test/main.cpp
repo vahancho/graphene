@@ -77,11 +77,14 @@ TEST(General, AddNode)
 TEST(General, ComplexNode)
 {
     Graphene<Node> graph;
+    const auto n = Node{-1, -1};
+    graph.addNode(n);
+
     graph.addNode({0, 0});
     graph.addEdge({0, 0}, {1, 1});
 
     EXPECT_EQ(graph.size(), 1);
-    EXPECT_EQ(graph.order(), 2);
+    EXPECT_EQ(graph.order(), 3);
     EXPECT_EQ(graph.nodeDegree({0, 0}), 1);
     EXPECT_EQ(graph.nodeDegree({1, 1}), 0);
     EXPECT_EQ(graph.adjacent({0, 0}, {1, 1}), true);
