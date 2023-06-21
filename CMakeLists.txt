@@ -27,72 +27,52 @@ cmake_minimum_required(VERSION 3.9)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(graphene VERSION 1.0.0
-        DESCRIPTION "A C++ implementation of an abstract graph library."
-        LANGUAGES CXX)
+option(ENABLE_TESTING "Enable unit test build" OFF)
 
-# Make cache variables for install destinations
+project(graphene
+        VERSION 0.0.1
+        DESCRIPTION "A header-only c++ library that provides implementation of an abstract graph."
+        HOMEPAGE_URL "https://github.com/vahancho/graphene")
+
 include(GNUInstallDirs)
 
-# General options
-option(BUILD_SHARED_LIBS   "Build using shared libraries" ON)
-option(ENABLE_TESTING      "Enable unit test build"       OFF)
-option(BUILD_DOCUMENTATION "Build documentation"          ON)
+add_library(${CMAKE_PROJECT_NAME} INTERFACE)
 
-# By default, Visual Studio detects a byte-order mark to determine if the source
-# file is in an encoded Unicode format, for example, UTF-16 or UTF-8. If no
-# byte-order mark is found, it assumes the source file is encoded using the
-# current user code page, unless you have specified a code page by using /utf-8
-if (MSVC)
-    # Instruct Visual Studio to use proper char set for both source and binary files.
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-endif()
+target_include_directories(${CMAKE_PROJECT_NAME} INTERFACE
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-if (NOT MSVC)
-    # Specify the target architecture (Linux). For Windows based generator use rather
-    # '-A Win32' or '-A x64 options'
-    set(TARGET_ARCH x86 CACHE STRING "the target architecture")
-    set_property(CACHE TARGET_ARCH PROPERTY STRINGS x86 x64)
+target_compile_features(${CMAKE_PROJECT_NAME} INTERFACE cxx_std_17)
 
-    if (TARGET_ARCH STREQUAL "x86")
-        set(CMAKE_C_FLAGS   -m32)
-        set(CMAKE_CXX_FLAGS -m32)
-    elseif(TARGET_ARCH STREQUAL "x64")
-        set(CMAKE_C_FLAGS   -m64)
-        set(CMAKE_CXX_FLAGS -m64)
-    else()
-        message(FATAL_ERROR "Incorrect target architecture specified. "
-                            "It should be either x86 or x64")
-    endif()
+# Installation
+install(TARGETS ${CMAKE_PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}_Targets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-    # Get the architecture: x86 vs x64
-    if(TARGET_ARCH STREQUAL "x64")
-        set(BIT "x86_64")
-    else()
-        set(BIT "x86")
-    endif()
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
+                                 VERSION ${PROJECT_VERSION}
+                                 COMPATIBILITY SameMajorVersion)
 
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
-else()
-    # By default, Visual Studio detects a byte-order mark to determine if the source
-    # file is in an encoded Unicode format, for example, UTF-16 or UTF-8. If no
-    # byte-order mark is found, it assumes the source file is encoded using the
-    # current user code page, unless you have specified a code page by using /utf-8
+configure_package_config_file(
+  "${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in"
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION
+  ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-    # Instruct Visual Studio to use proper char set for both source and binary files.
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-endif()
+install(EXPORT ${PROJECT_NAME}_Targets
+        FILE ${PROJECT_NAME}Targets.cmake
+        NAMESPACE gepaf::
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-# Append a postfix for the debug libraries
-if (NOT CMAKE_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX d)
-endif()
+install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+              "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+install(FILES ${PROJECT_SOURCE_DIR}/src/graphene.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 ###############################################################################
 # Generate documentation if needed
@@ -125,27 +105,8 @@ else()
     message("Failed to generate documentation: Doxygen is not found")
 endif()
 
-###############################################################################
-# Testing
-#
-if (ENABLE_TESTING)
-    # Coverage support.
-    option(CODE_COVERAGE "Enable coverage reporting" ON)
-    if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        # Add required flags (GCC & LLVM/Clang)
-	    add_compile_options(-O0        # no optimization
-                            -g         # generate debug info
-			                --coverage # sets all required flags
-	    )
-	    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-	        add_link_options(--coverage)
-	    else()
-	        link_libraries(--coverage)
-	    endif()
-    endif()
-endif()
-
-add_subdirectory(src)
+# Enable packaging with CPack
+include(CPack)
 
 if (ENABLE_TESTING)
     enable_testing()

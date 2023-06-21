@@ -25,8 +25,6 @@
 #ifndef __GRAPHENE_H__
 #define __GRAPHENE_H__
 
-#include "export.h"
-
 #include <map>
 #include <set>
 #include <vector>
@@ -39,7 +37,7 @@ enum class GraphType
 
 //! Implements an abstract graph.
 template<typename NodeType, GraphType GT = GraphType::Directed>
-class GRAPHENE_EXPORT Graphene
+class Graphene
 {
 public:
     /// Adds new node.
