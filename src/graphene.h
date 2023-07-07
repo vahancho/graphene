@@ -223,25 +223,6 @@ std::vector<NodeType> Graphene<NodeType, GT>::shortestPath(const NodeType &from,
     }
 
     return nodeWeights[to].path();
-
-    /*
-    printf("Node\t\tDistance\tPath\n");
-    for (const auto &i : nodeWeights) {
-        if (i.first == to) {
-            const auto &path = i.second.path();
-            ret = path;
-
-            std::cout << i.first << "\t\t" << i.second.weight() << "\t\t";
-            for (const auto &p : path) {
-                std::cout << p << "-->";
-            }
-            std::cout << '\n';
-            break;
-        }
-    }
-
-    return ret;
-    */
 }
 
 #endif // !__GRAPHENE_H__
