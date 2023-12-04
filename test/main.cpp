@@ -72,6 +72,14 @@ TEST(General, AddNode)
 
     EXPECT_EQ(graph.size(), 0);
     EXPECT_EQ(graph.order(), 1);
+
+    graph.addNode(0);
+    EXPECT_EQ(graph.size(), 0);
+    EXPECT_EQ(graph.order(), 2);
+
+    graph.addEdge(0, 42);
+    EXPECT_EQ(graph.size(), 1);
+    EXPECT_EQ(graph.order(), 2);
 }
 
 TEST(General, ComplexNode)
