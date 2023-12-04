@@ -25,11 +25,12 @@
 #ifndef __GRAPHENE_H__
 #define __GRAPHENE_H__
 
+#include <any>
+#include <iomanip>
 #include <map>
+#include <optional>
 #include <set>
 #include <queue>
-#include <cstddef>
-#include <vector>
 
 enum class GraphType
 {
@@ -42,6 +43,9 @@ template<typename NodeType, GraphType GT = GraphType::Directed>
 class Graphene
 {
 public:
+    using Path  = std::vector<NodeType>;
+    using Paths = std::vector<Path>;
+
     /// Adds new node.
     template<typename UR = NodeType>
     void addNode(UR && node);
@@ -75,11 +79,49 @@ public:
         \return A shortest path (list of nodes) between two nodes.
     */
     template <typename Func>
-    std::vector<NodeType> shortestPath(const NodeType &from,
-                                       const NodeType &to,
-                                       Func weightFunction) const;
+    Path shortestPath(const NodeType &from, const NodeType &to, Func weightFunction) const;
+
+    /// Returns the shortest paths from the node \p from to all connected nodes.
+    /*!
+        The function uses the Dijkstra algorithms for the shortest path between
+        two nodes. The \p weightFunction is a custom function that returns weight
+        that corresponds to two nodes (edge). For example, it can be a distance
+        between two geometrical points.
+
+        \param from The source node
+        \param weightFunction A function that calculates a weight for an edge (between to nodes)
+        \return A shortest paths (list of the lists of nodes).
+    */
+    template <typename Func>
+    Paths shortestPaths(const NodeType &from, Func weightFunction) const;
 
 private:
+
+    /// The node's weight abstraction.
+    template<typename WeightType>
+    class Weight
+    {
+    public:
+        Weight() = default;
+        Weight(const NodeType &from) : m_path{ from } {}
+        bool infinite() const { return m_infinite; }
+        void setWeight(WeightType weight) { m_weight = weight; m_infinite = false; }
+        WeightType weight() const { return m_weight; }
+        const Path &path() const { return m_path; }
+        Path &path() { return m_path; }
+
+    private:
+        WeightType m_weight{};
+        bool m_infinite{ true };
+        Path m_path;
+    };
+
+    /// Returns either the shortest path between nodes or shortest paths to all nodes from the given.
+    template <typename Func>
+    std::any getAnyPath(const NodeType &from, Func weightFunction,
+                        const std::optional<NodeType> &to = std::nullopt) const;
+
+    /// The graph itself.
     std::map<NodeType, std::set<NodeType>> m_adjacencyList;
 };
 
@@ -149,47 +191,51 @@ bool Graphene<NodeType, GT>::adjacent(const NodeType &x, const NodeType &y) cons
 }
 
 template<typename NodeType, GraphType GT>
-template <typename Func>
-std::vector<NodeType> Graphene<NodeType, GT>::shortestPath(const NodeType &from,
-                                                           const NodeType &to,
-                                                           Func weight) const
+template<typename Func>
+typename Graphene<NodeType, GT>::Path
+    Graphene<NodeType, GT>::shortestPath(const NodeType &from,
+                                         const NodeType &to,
+                                         Func weight) const
 {
-    if (m_adjacencyList.find(from) == m_adjacencyList.cend() ||
-        m_adjacencyList.find(to) == m_adjacencyList.cend()) {
-        return {};
+    return std::any_cast<Graphene<NodeType, GT>::Path>(getAnyPath(from, weight, to));
+}
+
+template<typename NodeType, GraphType GT>
+template<typename Func>
+typename Graphene<NodeType, GT>::Paths
+Graphene<NodeType, GT>::shortestPaths(const NodeType &from, Func weight) const
+{
+    return std::any_cast<Graphene<NodeType, GT>::Paths>(getAnyPath(from, weight));
+}
+
+template<typename NodeType, GraphType GT>
+template<typename Func>
+std::any Graphene<NodeType, GT>::getAnyPath(const NodeType &from, Func weight,
+                                            const std::optional<NodeType> &to) const
+{
+    if (m_adjacencyList.find(from) == m_adjacencyList.cend()) {
+        if (to) {
+            return Graphene<NodeType, GT>::Path{};
+        } else {
+            return Graphene<NodeType, GT>::Paths{};
+        }
     }
 
-    using WeightType = decltype(weight(from, to));
+    if (to && m_adjacencyList.find(to.value()) == m_adjacencyList.cend()) {
+        return Graphene<NodeType, GT>::Path{};
+    }
+
+    using WeightType = decltype(weight(from, from));
     using Pair = std::pair<WeightType, NodeType>;
 
     // A priority queue - the smallest element on top
     std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> queue;
 
-    // The node's weight abstraction.
-    class Weight
-    {
-    public:
-        using Path = std::vector<NodeType>;
-
-        Weight() = default;
-        Weight(const NodeType &from) : m_path{from} {}
-        bool infinite() const { return m_infinite; }
-        void setWeight(WeightType weight) { m_weight= weight; m_infinite = false; }
-        WeightType weight() const { return m_weight; }
-        const Path &path() const { return m_path; }
-        Path &path() { return m_path; }
-
-    private:
-        WeightType m_weight{};
-        bool m_infinite{true};
-        Path m_path;
-    };
-
-    std::map<NodeType, Weight> nodeWeights;
+    std::map<NodeType, Weight<WeightType>> nodeWeights;
 
     // Initialize with the source node.
-    queue.push({WeightType{}, from});
-    nodeWeights.emplace(from, Weight{from});
+    queue.push({ WeightType{}, from });
+    nodeWeights.emplace(from, Weight<WeightType>{from});
 
     while (!queue.empty()) {
         // Make a copy!
@@ -197,10 +243,15 @@ std::vector<NodeType> Graphene<NodeType, GT>::shortestPath(const NodeType &from,
         queue.pop();
         const auto &nodeWeight = nodeWeights[node];
 
+        // Return as soon as the destination node is found.
+        if (to && node == to) {
+            return nodeWeight.path();
+        }
+
         auto it = m_adjacencyList.find(node);
         if (it != m_adjacencyList.cend()) {
             for (const auto &adjacent : it->second) {
-                auto edgeWeight = weight(node, adjacent);
+                const auto edgeWeight = weight(node, adjacent);
 
                 // If there is shorted path to 'adjacent' through 'node'.
                 auto &adjacentWeight = nodeWeights[adjacent];
@@ -210,11 +261,7 @@ std::vector<NodeType> Graphene<NodeType, GT>::shortestPath(const NodeType &from,
                     adjacentWeight.setWeight(totalWeight);
 
                     auto &adjacentPath = adjacentWeight.path();
-                    auto &nodePath = nodeWeight.path();
-
-                    adjacentPath.insert(adjacentPath.end(),
-                                        nodePath.begin(),
-                                        nodePath.end());
+                    adjacentPath = nodeWeight.path();
                     adjacentPath.emplace_back(adjacent);
 
                     queue.push({adjacentWeight.weight(), adjacent});
@@ -223,8 +270,21 @@ std::vector<NodeType> Graphene<NodeType, GT>::shortestPath(const NodeType &from,
         }
     }
 
-    return nodeWeights[to].path();
+    if (to) {
+        auto it = nodeWeights.find(to.value());
+        return it != nodeWeights.cend() ? it->second.path() : Path{};
+    }
+
+    Paths paths;
+
+    for (auto && nw : nodeWeights) {
+        paths.emplace_back(nw.second.path());
+    }
+
+    return paths;
 }
+
+
 
 #endif // !__GRAPHENE_H__
 
