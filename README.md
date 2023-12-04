@@ -6,7 +6,7 @@ the custom weight function.
 
 [![Latest release](https://img.shields.io/github/v/release/vahancho/graphene?include_prereleases)](https://github.com/vahancho/graphene/releases)
 [![Build and test (CMake)](https://github.com/vahancho/graphene/actions/workflows/cmake.yml/badge.svg)](https://github.com/vahancho/graphene/actions/workflows/cmake.yml)
-[![Code coverage](https://codecov.io/gh/vahancho/graphene/branch/master/graph/badge.svg)](https://codecov.io/gh/vahancho/graphene)
+[![Code coverage](https://codecov.io/gh/vahancho/graphene/graph/badge.svg?token=YLMFIEZBGG)](https://codecov.io/gh/vahancho/graphene)
 
 ## Prerequisites
 
