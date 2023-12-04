@@ -91,6 +91,121 @@ TEST(General, ComplexNode)
     EXPECT_EQ(graph.adjacent({1, 1}, {0, 0}), false);
 }
 
+TEST(General, ShortestPath)
+{
+    //
+    // 1--2--5--8
+    //  \     \/
+    //   10---6---7
+    //
+    Graphene<int> graph;
+
+    auto weightFunction = [](int x, int y) -> int {
+        return std::abs(x - y);
+    };
+
+    // Non existent nodes
+    auto path = graph.shortestPath(1, 2, weightFunction);
+    EXPECT_EQ(path.size(), 0);
+
+    graph.addEdge(1, 2);
+    graph.addEdge(2, 5);
+    graph.addEdge(5, 6);
+    graph.addEdge(5, 8);
+    graph.addEdge(8, 6);
+    graph.addEdge(1, 10);
+    graph.addEdge(10, 6);
+    graph.addEdge(6, 7);
+
+    EXPECT_EQ(graph.size(), 8);
+    EXPECT_EQ(graph.order(), 7);
+
+    path = graph.shortestPath(1, 6, weightFunction);
+    EXPECT_EQ(path.size(), 4);
+    EXPECT_EQ(path[0], 1);
+    EXPECT_EQ(path[1], 2);
+    EXPECT_EQ(path[2], 5);
+    EXPECT_EQ(path[3], 6);
+
+    graph.addNode(42);
+    path = graph.shortestPath(1, 42, weightFunction);
+    EXPECT_EQ(path.size(), 0); // There is no path from 1 to 42
+}
+
+TEST(General, ShortestPaths)
+{
+    //
+    // 1--2--5--8
+    //  \     \/
+    //   10---6---7
+    //
+    Graphene<int> graph;
+
+    auto weightFunction = [] (int x, int y) -> int {
+        return std::abs(x - y);
+    };
+
+    graph.addEdge(1, 2);
+    graph.addEdge(2, 5);
+    graph.addEdge(5, 6);
+    graph.addEdge(5, 8);
+    graph.addEdge(8, 6);
+    graph.addEdge(1, 10);
+    graph.addEdge(10, 6);
+    graph.addEdge(6, 7);
+
+    EXPECT_EQ(graph.size(), 8);
+    EXPECT_EQ(graph.order(), 7);
+
+    auto paths = graph.shortestPaths(1, weightFunction);
+
+    // All nodes should be connected
+    EXPECT_EQ(paths.size(), graph.order());
+
+    // 1->1
+    EXPECT_EQ(paths[0].size(), 1);
+    EXPECT_EQ(paths[0][0], 1);
+
+    // 1->2
+    EXPECT_EQ(paths[1].size(), 2);
+    EXPECT_EQ(paths[1][0], 1);
+    EXPECT_EQ(paths[1][1], 2);
+
+    // 1->5
+    EXPECT_EQ(paths[2].size(), 3);
+    EXPECT_EQ(paths[2][0], 1);
+    EXPECT_EQ(paths[2][1], 2);
+    EXPECT_EQ(paths[2][2], 5);
+
+    // 1->6
+    EXPECT_EQ(paths[3].size(), 4);
+    EXPECT_EQ(paths[3][0], 1);
+    EXPECT_EQ(paths[3][1], 2);
+    EXPECT_EQ(paths[3][2], 5);
+    EXPECT_EQ(paths[3][3], 6);
+
+    // 1->7
+    EXPECT_EQ(paths[4].size(), 5);
+    EXPECT_EQ(paths[4][0], 1);
+    EXPECT_EQ(paths[4][1], 2);
+    EXPECT_EQ(paths[4][2], 5);
+    EXPECT_EQ(paths[4][3], 6);
+    EXPECT_EQ(paths[4][4], 7);
+
+    // 1->8
+    EXPECT_EQ(paths[5].size(), 4);
+    EXPECT_EQ(paths[5][0], 1);
+    EXPECT_EQ(paths[5][1], 2);
+    EXPECT_EQ(paths[5][2], 5);
+    EXPECT_EQ(paths[5][3], 8);
+
+    // 1->10
+    EXPECT_EQ(paths[6].size(), 2);
+    EXPECT_EQ(paths[6][0], 1);
+    EXPECT_EQ(paths[6][1], 10);
+}
+
+
 int main(int argc, char**argv)
 {
     testing::InitGoogleTest(&argc, argv);
