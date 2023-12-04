@@ -26,6 +26,46 @@ not only the shortest path, but the path that corresponds to the minimal overall
 
 ## API and usage
 
+```cpp
+// Declare a graph with nodes as integer values
+Graphene<int> graph;
+
+graph.addNode(0);
+graph.addNode(42);
+
+graph.addEdge(0, 42);
+graph.addEdge(1, 2);
+
+```
+
+Calculate the shortest path between two nodes
+
+```cpp
+
+// 1--2--5--8
+//  \     \/
+//   10---6---7
+//
+Graphene<int> graph;
+
+auto weightFunction = [](int x, int y) -> int {
+    return std::abs(x - y);
+};
+
+graph.addEdge(1, 2);
+graph.addEdge(2, 5);
+graph.addEdge(5, 6);
+graph.addEdge(5, 8);
+graph.addEdge(8, 6);
+graph.addEdge(1, 10);
+graph.addEdge(10, 6);
+graph.addEdge(6, 7);
+
+path = graph.shortestPath(1, 6, weightFunction);
+// path = {1, 2, 5, 6}
+
+```
+
 ## Example (California road network)
 
 # See also
