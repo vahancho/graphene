@@ -28,7 +28,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 17)
 
-option(ENABLE_TESTING "Enable unit test build" OFF)
+option(ENABLE_TESTING      "Enable unit test build" OFF)
+option(ENABLE_EXAMPLES     "Enable examples build"  OFF)
+option(BUILD_DOCUMENTATION "Build documentation"    OFF)
 
 project(graphene
         VERSION 0.0.1
@@ -105,8 +107,16 @@ else()
     message("Failed to generate documentation: Doxygen is not found")
 endif()
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # Enable packaging with CPack
 include(CPack)
+
+if (ENABLE_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 if (ENABLE_TESTING)
     enable_testing()
