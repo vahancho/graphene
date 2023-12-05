@@ -33,7 +33,7 @@ option(ENABLE_EXAMPLES     "Enable examples build"  OFF)
 option(BUILD_DOCUMENTATION "Build documentation"    OFF)
 
 project(graphene
-        VERSION 0.0.1
+        VERSION 1.0.0
         DESCRIPTION "A header-only c++ library that provides implementation of an abstract graph."
         HOMEPAGE_URL "https://github.com/vahancho/graphene")
 
