@@ -83,28 +83,30 @@ install(FILES ${PROJECT_SOURCE_DIR}/src/graphene.h DESTINATION ${CMAKE_INSTALL_I
 # Check if Doxygen is installed
 find_package(Doxygen)
 
-if (DOXYGEN_FOUND AND BUILD_DOCUMENTATION)
-    set(DOXYGEN_GENERATE_LATEX          NO)
-    set(DOXYGEN_CREATE_SUBDIRS          YES)
-    set(DOXYGEN_OUTPUT_DIRECTORY        ${CMAKE_BINARY_DIR}/docs/html)
-    set(DOXYGEN_PROJECT_NAME            ${PROJECT_DESCRIPTION})
-    set(DOXYGEN_EXTRACT_STATIC          YES)
-    set(DOXYGEN_EXTRACT_ALL             YES)
-    set(DOXYGEN_EXTRACT_LOCAL_METHODS   YES)
-    set(DOXYGEN_WARN_NO_PARAMDOC        YES)
-    set(DOXYGEN_RECURSIVE               YES)
-    set(DOXYGEN_EXCLUDE                 ${PROJECT_SOURCE_DIR}/tes)
-    set(DOXYGEN_HTML_OUTPUT             .)
-    set(DOXYGEN_GENERATE_TREEVIEW       YES)
-    set(DOXYGEN_USE_MDFILE_AS_MAINPAGE  README.md)
+if (BUILD_DOCUMENTATION)
+    if (DOXYGEN_FOUND)
+        set(DOXYGEN_GENERATE_LATEX          NO)
+        set(DOXYGEN_CREATE_SUBDIRS          YES)
+        set(DOXYGEN_OUTPUT_DIRECTORY        ${CMAKE_BINARY_DIR}/docs/html)
+        set(DOXYGEN_PROJECT_NAME            ${PROJECT_DESCRIPTION})
+        set(DOXYGEN_EXTRACT_STATIC          YES)
+        set(DOXYGEN_EXTRACT_ALL             YES)
+        set(DOXYGEN_EXTRACT_LOCAL_METHODS   YES)
+        set(DOXYGEN_WARN_NO_PARAMDOC        YES)
+        set(DOXYGEN_RECURSIVE               YES)
+        set(DOXYGEN_EXCLUDE                 ${PROJECT_SOURCE_DIR}/tes)
+        set(DOXYGEN_HTML_OUTPUT             .)
+        set(DOXYGEN_GENERATE_TREEVIEW       YES)
+        set(DOXYGEN_USE_MDFILE_AS_MAINPAGE  README.md)
 
-    # Add the documentation target. This target doesn't build by default if doxygen is found.
-    # To build it explicitly, use '--target documentation' or 'make documentation' option.
-    doxygen_add_docs(documentation
-                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                     COMMENT "Building the project documentation")
-else()
-    message("Failed to generate documentation: Doxygen is not found")
+        # Add the documentation target. This target doesn't build by default if doxygen is found.
+        # To build it explicitly, use '--target documentation' or 'make documentation' option.
+        doxygen_add_docs(documentation
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                         COMMENT "Building the project documentation")
+    else()
+        message("Failed to generate documentation: Doxygen is not found")
+    endif()
 endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
