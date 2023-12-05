@@ -68,17 +68,38 @@ path = graph.shortestPath(1, 6, weightFunction);
 // path = {1, 2, 5, 6}
 ```
 
+## Build and test
+
+In order to build the project please use the following commands:
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTING=True
+cmake --build build --config Release
+```
+
+To run the unit tests
+
+```bash
+ctest -C Release --verbose
+```
+
 ## Example (California road network)
 
 The `roadmap` example demonstrates how to use `Graphene` library to create a road
-map. As an input we used the [California Road Network]
-(https://users.cs.utah.edu/~lifeifei/SpatialDataset.htm) which represented by two files:
-`/examples/data/nodes_lon_lat.txt` with the nodes' geodetic coordinates and
-`/examples/data/edges.txt` file with nodes indexes and distance between them.
+map. As an input we used the [California Road Network](https://users.cs.utah.edu/~lifeifei/SpatialDataset.htm)
+which represented by two files: `/examples/data/nodes_lon_lat.txt` with the nodes'
+geodetic coordinates and `/examples/data/edges.txt` file with nodes indexes and
+distance between them.
 Using this data we created an undirected graph and use `Graphene::shortestPaths()`
 function to find all paths that connect a node with all others. The tool exports
 the results as a [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) file
 which can be loaded, for example, into Google Earth application for visualization.
+
+The `roadmap` application usage example is:
+
+```bash
+./roadmap edges.txt nodes_lon_lat.txt 10000 california_roadmap.kml
+```
 
 <img src="./examples/data/california_roadmap.png" alt="California Road Network" width="350">
 
