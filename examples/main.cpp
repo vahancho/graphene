@@ -34,7 +34,7 @@ static const constexpr char usage[] =
 "    edges      path to the file with edges\n"
 "    nodes      path to the file with nodes' coordinates\n"
 "    maxpaths   the maximum number of paths to export\n"
-"    output     the path to the output file.\n";
+"    output     the path to the output KML file.\n";
 
 int main(int argc, char **argv)
 {

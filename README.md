@@ -27,6 +27,8 @@ not only the shortest path, but the path that corresponds to the minimal overall
 ## API and usage
 
 ```cpp
+#include "graphene.h"
+
 // Declare a graph with nodes as integer values
 Graphene<int> graph;
 
@@ -41,6 +43,7 @@ graph.addEdge(1, 2);
 Calculate the shortest path between two nodes
 
 ```cpp
+#include "graphene.h"
 
 // 1--2--5--8
 //  \     \/
@@ -63,10 +66,21 @@ graph.addEdge(6, 7);
 
 path = graph.shortestPath(1, 6, weightFunction);
 // path = {1, 2, 5, 6}
-
 ```
 
 ## Example (California road network)
+
+The `roadmap` example demonstrates how to use `Graphene` library to create a road
+map. As an input we used the [California Road Network]
+(https://users.cs.utah.edu/~lifeifei/SpatialDataset.htm) which represented by two files:
+`/examples/data/nodes_lon_lat.txt` with the nodes' geodetic coordinates and
+`/examples/data/edges.txt` file with nodes indexes and distance between them.
+Using this data we created an undirected graph and use `Graphene::shortestPaths()`
+function to find all paths that connect a node with all others. The tool exports
+the results as a [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) file
+which can be loaded, for example, into Google Earth application for visualization.
+
+<img src="./examples/data/california_roadmap.png" alt="California Road Network" width="350">
 
 # See also
 
