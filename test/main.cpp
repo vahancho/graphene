@@ -125,6 +125,10 @@ TEST(General, ShortestPath)
     graph.addEdge(10, 6);
     graph.addEdge(6, 7);
 
+    // Non existent nodes
+    path = graph.shortestPath(1, 222, weightFunction);
+    EXPECT_EQ(path.size(), 0);
+
     EXPECT_EQ(graph.size(), 8);
     EXPECT_EQ(graph.order(), 7);
 
