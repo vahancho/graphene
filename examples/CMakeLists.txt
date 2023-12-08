@@ -23,9 +23,10 @@
 #**********************************************************************************/
 
 # Example application
-set(TARGET roadmap)
-add_executable(${TARGET} main.cpp)
+set(TARGET ca_roadmap)
+set(KMLFILE kmlfile.h kmlfile.cpp)
 
+add_executable(${TARGET}  ${KMLFILE} ca_main.cpp)
 target_link_libraries(${TARGET} graphene)
 
 # Copy the directory with road map data files

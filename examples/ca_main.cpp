@@ -23,31 +23,33 @@
 ***********************************************************************************/
 
 #include "graphene.h"
+#include "kmlfile.h"
 
 #include <iostream>
+#include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <string>
 
 static const constexpr char usage[] =
-"Usage: roadmap edges nodes maxpaths output\n"
+"Usage: roadmap maxpaths output\n"
 "Generates an KML file with the shortest paths from the given nodes to all connected nodes\n\n"
-"    edges      path to the file with edges\n"
-"    nodes      path to the file with nodes' coordinates\n"
-"    maxpaths   the maximum number of paths to export\n"
-"    output     the path to the output KML file.\n";
+"    maxpaths   the maximum number of paths to export\n";
 
 int main(int argc, char **argv)
 {
-    if (argc != 5) {
+    if (argc != 2) {
         std::cerr << "Incorrect number of arguments\n";
         std::cerr << usage;
         return 1;
     }
 
-    const std::string edgesFile(argv[1]);
-    const std::string nodesFile(argv[2]);
-    const size_t maxPaths(std::stoi(argv[3]));
-    const std::string outputFile(argv[4]);
+    const auto binDirPath = std::filesystem::path(argv[0]).parent_path();
+
+    const auto edgesFile  = binDirPath / "data/edges.txt";
+    const auto nodesFile  = binDirPath / "data/nodes_lon_lat.txt";
+    const auto outputFile = binDirPath / "data/ca_roadmap_output.kml";
+    const size_t maxPaths(std::stoi(argv[1]));
 
     Graphene<int, GraphType::Undirected> graph;
     std::map<std::pair<int, int>, double> edges;
@@ -87,48 +89,20 @@ int main(int argc, char **argv)
     // Extract all paths that link to the given node
     auto paths = graph.shortestPaths(1, weight);
 
-    std::ofstream kmlFile(outputFile);
+    KmlFile kmlFile(outputFile.string());
     if (!kmlFile) {
         std::cerr << "Failed to open file" << outputFile << std::endl;
         return 1;
     }
 
-    kmlFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
-        "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" \
-        "  <Document>\n" \
-        "    <name>Paths</name>\n" \
-        "      <Style id=\"redPoly\">\n" \
-        "        <LineStyle>\n" \
-        "          <color>ff0000ff</color>\n" \
-        "          <width>0.5</width>\n" \
-        "        </LineStyle>\n" \
-        "      </Style>\n";
-
-    size_t routeId = {};
-
     for (auto && path : paths) {
-        if (routeId > maxPaths) {
-            break;
-        }
-
-        kmlFile << "    <Placemark>\n" \
-        "      <name>Route " << routeId++ << "</name>\n" \
-        "      <styleUrl>#redPoly</styleUrl>\n" \
-        "      <LineString>\n" \
-        "        <coordinates>\n";
-
-        for (const auto &nodeId : path) {
+        kmlFile.addPlacemark(path, [&] (int nodeId) {
             const auto &point = nodes[nodeId];
-            kmlFile << std::setprecision(15) << point.first << ',' << point.second << ",0" << '\n';
-        }
-
-        kmlFile << "        </coordinates>\n"
-                   "      </LineString>\n"
-                   "    </Placemark>\n";
+            std::stringstream stream;
+            stream << std::setprecision(15) << point.first << ',' << point.second;
+            return stream.str();
+        });
     }
-
-    kmlFile << "  </Document>\n" \
-               "</kml>";
 
     return 0;
 }
