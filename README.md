@@ -83,10 +83,41 @@ To run the unit tests
 ctest -C Release --verbose
 ```
 
-## Example (California road network)
+## Examples
 
-The `roadmap` example demonstrates how to use `Graphene` library to create a road
-map. As an input we used the [California Road Network](https://users.cs.utah.edu/~lifeifei/SpatialDataset.htm)
+The `ca_roadmap` and `hh_roadmap` examples demonstrate how to use `Graphene` library
+to create road maps and find shortest paths between two nodes.
+
+### Hamburger road network
+
+The Hamburger road network is an interactive sample application which uses the large dataset
+[Road network Hamburg (INSPIRE)](https://data.europa.eu/data/datasets/19a39b3a-2d9e-4805-a5e6-56a5ca3ec8cb?locale=en)
+provided by Behörde für Verkehr und Mobilitätswende (BVM)
+[Data license Germany – attribution – Version 2.0](http://www.govdata.de/dl-de/by-2-0).
+The data set is represented by a number of CSV files which we parse and extract
+the streets network (geodetic coordinates and street names) of the city.
+
+The `hh_roadmap` application's usage example is:
+
+```bash
+./hh_roadmap
+```
+
+The application prompts for the start and end street names and calculates the
+shortest path between them as well as the distance. The resulting `KML` file
+saves into the `/data/hh_roadmap_output.kml` file.
+
+#### The Hamburger road network
+
+<img src="./examples/data/hamburg_roadmap.png" alt="Hamburg Road Network" width="400">
+
+#### The shortest path between two streets
+
+<img src="./examples/data/hamburg_shortestpath.png" alt="The shortest path between two streets" width="600">
+
+### California road network
+
+As an input we used the [California Road Network](https://users.cs.utah.edu/~lifeifei/SpatialDataset.htm)
 which represented by two files: `/examples/data/nodes_lon_lat.txt` with the nodes'
 geodetic coordinates and `/examples/data/edges.txt` file with nodes indexes and
 distance between them.
@@ -95,11 +126,12 @@ function to find all paths that connect a node with all others. The tool exports
 the results as a [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) file
 which can be loaded, for example, into Google Earth application for visualization.
 
-The `roadmap` application usage example is:
+The `ca_roadmap` application's usage example is:
 
 ```bash
-./roadmap edges.txt nodes_lon_lat.txt 10000 california_roadmap.kml
+./ca_roadmap 10000
 ```
+where `10000` is the max. number of paths to export.
 
 <img src="./examples/data/california_roadmap.png" alt="California Road Network" width="350">
 
