@@ -271,8 +271,8 @@ std::any Graphene<NodeType, GT>::getAnyPath(const NodeType &from, Func weight,
     }
 
     if (to) {
-        auto it = nodeWeights.find(to.value());
-        return it != nodeWeights.cend() ? it->second.path() : Path{};
+        // If we here the path isn't found.
+        return Path{};
     }
 
     Paths paths;
