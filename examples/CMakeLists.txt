@@ -29,6 +29,9 @@ set(KMLFILE kmlfile.h kmlfile.cpp)
 add_executable(${TARGET}  ${KMLFILE} ca_main.cpp)
 target_link_libraries(${TARGET} graphene)
 
+add_executable(hh_roadmap ${KMLFILE} hh_main.cpp)
+target_link_libraries(hh_roadmap graphene)
+
 # Copy the directory with road map data files
 add_custom_command(TARGET ${TARGET} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
