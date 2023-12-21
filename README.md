@@ -1,3 +1,15 @@
+- [The Graphene](#the-graphene)
+  - [Prerequisites](#prerequisites)
+  - [Shortest paths](#shortest-paths)
+  - [API and usage](#api-and-usage)
+  - [Build and test](#build-and-test)
+  - [Examples](#examples)
+    - [Hamburger road network](#hamburger-road-network)
+      - [The Hamburger road network](#the-hamburger-road-network)
+      - [The shortest path between two streets](#the-shortest-path-between-two-streets)
+    - [California road network](#california-road-network)
+- [See also](#see-also)
+
 # The Graphene
 
 `Graphene` is a header-only library that implements an abstract graph. The class template allows
